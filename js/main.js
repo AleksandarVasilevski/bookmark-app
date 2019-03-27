@@ -10,18 +10,7 @@ class Bookmark {
 class UI{
 	//Display bookmarks
 	static displayBookmarks(){
-		const StoredBookmarks = [
-			{
-				title: 'Google',
-				link: 'www.google.com'
-			},
-			{
-				title: 'Facebook',
-				link: 'www.facebook.com'
-			}
-		];
-
-		const bookmarks = StoredBookmarks;
+		const bookmarks = Store.getBookmarks();
 
 		bookmarks.forEach((bookmark) => UI.addBookmarkToList(bookmark));
 	}
@@ -65,7 +54,7 @@ class UI{
 	}
 
 	//Delete bookmark
-	static removeBook(element){
+	static removeBookmark(element){
 		if (element.classList.contains('delete')) {
 			element.parentElement.parentElement.remove();
 		}
@@ -73,9 +62,37 @@ class UI{
 }
 
 //Store Class
+class Store {
+	static getBookmarks() {
+		let bookmarks;
+		if(localStorage.getItem('bookmarks') === null){
+			bookmarks = [];
+		}else {
+			bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
+		}
+		return bookmarks;
+	}
+
+	static addBookmark(bookmark) {
+		const bookmarks = Store.getBookmarks();
+		bookmarks.push(bookmark);
+		localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+	}
+
+	static removeBookmark(link) {
+		const bookmarks = Store.getBookmarks();
+		bookmarks.forEach((bookmark, index) => {
+			if(link === bookmarks.link){
+				bookmarks.splice(index, 1);
+			}
+		});
+
+		localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+	}
+}
 
 //Event Display Bookmark
-document.addEventListener('DOMContentLoaded', UI.displayBookmarks);
+document.addEventListener('DOMContentLoaded', UI.displayBookmarks());
 
 //Event Add Bookmark
 document.querySelector('#bookmark-form').addEventListener('submit', (e) => {
@@ -96,6 +113,9 @@ document.querySelector('#bookmark-form').addEventListener('submit', (e) => {
 		//Add bookmark to UI
 		UI.addBookmarkToList(bookmark);
 
+		//Add bookmark to local store
+		Store.addBookmark(bookmark);
+
 		//Show success message
 		UI.showAlert('Bookmark Added', 'success');
 
@@ -106,7 +126,9 @@ document.querySelector('#bookmark-form').addEventListener('submit', (e) => {
 
 //Event Remove Bookmark
 document.querySelector('#bookmark-list').addEventListener('click', (e) => {
-	UI.removeBook(e.target);
+	UI.removeBookmark(e.target);
+
+	Store.removeBookmark();
 
 	//Show success message
 	UI.showAlert('Bookmark Removed', 'success');
