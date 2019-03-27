@@ -45,6 +45,19 @@ class UI{
 		list.appendChild(row);
 	}
 
+	//Alert
+	static showAlert(message, className){
+		const div = document.createElement('div');
+		div.className = `alert alert-${className}`;
+		div.appendChild(document.createTextNode(message));
+		const container = document.querySelector('.container');
+		const form = document.querySelector('#bookmark-form');
+		container.insertBefore(div, form);
+
+		//Dismiss after 3 seconds
+		setTimeout(() => document.querySelector('.alert').remove(), 3000);
+	}
+
 	//Clear all form fields
 	static clearFields(){
 		document.querySelector('#title').value = '';
@@ -73,17 +86,28 @@ document.querySelector('#bookmark-form').addEventListener('submit', (e) => {
 	const title = document.querySelector('#title').value;
 	const link = document.querySelector('#link').value;
 
-	//Create a bookmark
-	const bookmark = new Bookmark(title, link);
+	//Validate
+	if (title === '' || link === '') {
+		UI.showAlert('Please fill in all the fields', 'danger');	
+	}else{
+		//Create a bookmark
+		const bookmark = new Bookmark(title, link);
 
-	//Add bookmark to UI
-	UI.addBookmarkToList(bookmark);
+		//Add bookmark to UI
+		UI.addBookmarkToList(bookmark);
 
-	//Clear fields
-	UI.clearFields();
+		//Show success message
+		UI.showAlert('Bookmark Added', 'success');
+
+		//Clear fields
+		UI.clearFields();
+	}
 });
 
 //Event Remove Bookmark
 document.querySelector('#bookmark-list').addEventListener('click', (e) => {
 	UI.removeBook(e.target);
+
+	//Show success message
+	UI.showAlert('Bookmark Removed', 'success');
 });
